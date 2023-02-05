@@ -42,28 +42,34 @@ public class ApplicationFrame extends JFrame implements WindowListener {
 	private SplashScreen splashScreen;
 	private Graphics2D splashGraphics2D;
 	private Font splashFont = new Font("Arial", Font.BOLD, 14);
+	private String appName;
+	private String appVersion;
 	
-	public ApplicationFrame() throws HeadlessException {
+	public ApplicationFrame(String appName, String appVersion) throws HeadlessException {
 		super();
-		initialize();
+		initialize(appName, appVersion);
+		setTitle(appName);
 	}
 
-	public ApplicationFrame(GraphicsConfiguration graphicsConfiguration) {
+	public ApplicationFrame(String appName, String appVersion, GraphicsConfiguration graphicsConfiguration) {
 		super(graphicsConfiguration);
-		initialize();
+		initialize(appName, appVersion);
+		setTitle(appName);
 	}
 
-	public ApplicationFrame(String title, GraphicsConfiguration graphicsConfiguration) {
+	public ApplicationFrame(String appName, String appVersion, String title, GraphicsConfiguration graphicsConfiguration) {
 		super(title, graphicsConfiguration);
-		initialize();
+		initialize(appName, appVersion);
 	}
 
-	public ApplicationFrame(String title) throws HeadlessException {
+	public ApplicationFrame(String appName, String appVersion, String title) throws HeadlessException {
 		super(title);
-		initialize();
+		initialize(appName, appVersion);
 	}
 	
-	private void initialize() {
+	private void initialize(String appName, String appVersion) {
+		this.appName = appName;
+		this.appVersion = appVersion;
 		this.splashScreen = SplashScreen.getSplashScreen();
 		log.info("Splash screen " + ((this.splashScreen == null)? "disabled." : "enabled."));
 		if (this.splashScreen != null) {
@@ -73,8 +79,14 @@ public class ApplicationFrame extends JFrame implements WindowListener {
 		this.closeListeners = new ArrayList<CloseListener>();
 		addWindowListener(this);
 		PlatformTool.fireWindowClosingOnMacQuit(this);
-		//TODO: Consider whether or not to replace VersionHistory functionality; for now, it has been removed
-		//Note that VersionHistory was also set to set the product name in the title (setTitle(versionHistory.getProductName())
+	}
+	
+	public String getApplicationName() {
+		return appName;
+	}
+	
+	public String getApplicationVersion() {
+		return appVersion;
 	}
 	
 	@Override
