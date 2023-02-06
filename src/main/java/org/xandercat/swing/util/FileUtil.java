@@ -17,6 +17,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.xandercat.swing.file.BinaryPrefix;
 
 /**
  * FileUtil provides various utility methods specific to working with files.
@@ -33,21 +34,6 @@ public class FileUtil {
 	private static final Map<File,Long> unresponsiveFileMap = Collections.synchronizedMap(new HashMap<File,Long>());
 	private static final long FILE_ACCESS_TIMEOUT = 1000L;		// in milliseconds
 	private static final long UNRESPONSIVE_FILE_RETRY_INTERVAL = 120000L;	// in milliseconds
-	
-	public static enum BinaryPrefix {
-		
-		bytes(1L), KiB(1024L), MiB(1024L*1024), GiB(1024L*1024*1024), TiB(1024L*1024*1024*1024);
-		
-		private long byteMultiplier;
-		
-		private BinaryPrefix(long byteMultiplier) {
-			this.byteMultiplier = byteMultiplier;
-		}
-		
-		public long getByteMultiplier() {
-			return byteMultiplier;
-		}
-	}
 	
 	private static class DirectoryChecker implements Callable<Boolean> {
 
@@ -482,7 +468,7 @@ public class FileUtil {
 	 * @return				size in new unit
 	 */
 	public static double convertFileSize(double size, BinaryPrefix fromUnit, BinaryPrefix toUnit) {
-		return (double) (size * fromUnit.byteMultiplier) / (double) toUnit.byteMultiplier;
+		return (double) (size * fromUnit.getByteMultiplier()) / (double) toUnit.getByteMultiplier();
 	}
 	
 	/**
