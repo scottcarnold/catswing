@@ -1,4 +1,4 @@
-# catswing
+# CatSwing
 Reusable classes and tools for Java Swing.
 
-This is a revamped collection of classes from years ago when Swing was more common and I was writing Swing applications for myself as a hobby.  These are generic in nature and could be used for any number of Swing applications, but were primarily used for my CatBack and CatScan applications which I also intend to revamp and add to my collection of repositories.
+This is a revamped collection of classes providing reusable panels and dialogs, file management, logging tools, cross-platform features, and animation effects.  While targeted for use with certain other Swing applications, they are generic in nature and could be used for any number of Swing applications.
