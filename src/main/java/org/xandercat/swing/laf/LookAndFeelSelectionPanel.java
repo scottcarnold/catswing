@@ -47,7 +47,7 @@ public class LookAndFeelSelectionPanel extends JPanel implements ListSelectionLi
 	private String[] lafNames;
 	private String currentLAFName;
 	private Map<String, LAFDetail> lafDetailMap = new HashMap<String, LAFDetail>();
-	private JList lafList;
+	private JList<String> lafList;
 	private JLabel detailImageLabel;
 	private ImageIcon detailImage;
 	private JLabel detailLabel;
@@ -76,7 +76,7 @@ public class LookAndFeelSelectionPanel extends JPanel implements ListSelectionLi
 		addDetail("Nimbus", "nimbus.png", "A Java Look and Feel rendered using vector graphics.\n\nThis Look and Feel was introducted on October 15, 2008 as part of Java 6 update 10.");
 		addDetail("Metal", "metal.png", "The defacto Java Look and Feel that serves as the default for Java applications on systems running Microsoft Windows.");
 		addDetail("CDE/Motif", "motif.png", "A Look and Feel that emulates the X Window system used for old UNIX desktop environments.");
-		this.lafList = new JList(this.lafNames);
+		this.lafList = new JList<String>(this.lafNames);
 		this.lafList.setSelectedValue(this.currentLAFName, true);
 		this.lafList.addListSelectionListener(this);
 		this.lafList.setCellRenderer(new CustomFontListCellRenderer(16f));

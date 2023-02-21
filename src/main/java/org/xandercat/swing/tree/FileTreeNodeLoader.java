@@ -43,7 +43,7 @@ public class FileTreeNodeLoader extends SwingWorker<FileTreeNode, FileTreeNodeLo
 		this.expand = expand;
 	}
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	@Override
 	protected FileTreeNode doInBackground() throws Exception {
 		FileTreeFactory factory = tree.getFactory();

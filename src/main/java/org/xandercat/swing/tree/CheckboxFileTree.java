@@ -147,7 +147,7 @@ public class CheckboxFileTree extends FileTree implements MouseListener {
 		return checkedFilesCopy;
 	}
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	private List<File> getCheckedFiles(CheckboxFileTreeNode node) {
 		List<File> files = new ArrayList<File>();
 		for (Enumeration e = node.children(); e.hasMoreElements();) {
