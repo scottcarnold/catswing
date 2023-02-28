@@ -18,6 +18,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
+import org.xandercat.swing.mouse.ClickPassthroughListener;
 import org.xandercat.swing.mouse.RolloverPassthroughListener;
 
 /**
@@ -88,6 +89,7 @@ public class CloseableTab extends JPanel {
 		});
 		this.closeButton.addMouseListener(new RolloverPassthroughListener(tabbedPane));
 		this.label.addMouseListener(new RolloverPassthroughListener(tabbedPane));
+		this.label.addMouseListener(new ClickPassthroughListener(tabbedPane));
 		add(label);
 		add(Box.createHorizontalStrut(5));
 		add(this.closeButton);
