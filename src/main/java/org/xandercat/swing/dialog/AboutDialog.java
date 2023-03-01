@@ -97,10 +97,18 @@ public class AboutDialog extends JDialog implements HyperlinkListener {
 	}
 	
 	public void addMarkdownContent(URL markdownURL) {
-		addMarkdownContent(new File(markdownURL.getFile()));
+		addMarkdownContent(markdownURL, null);
+	}
+	
+	public void addMarkdownContent(URL markdownURL, String cssStyle) {
+		addMarkdownContent(new File(markdownURL.getFile()), cssStyle);
 	}
 	
 	public void addMarkdownContent(File markdownFile) {
+		addMarkdownContent(markdownFile, null);
+	}
+	
+	public void addMarkdownContent(File markdownFile, String cssStyle) {
 		StringBuilder markdownText = new StringBuilder();
 		try (BufferedReader reader = new BufferedReader(new FileReader(markdownFile))) {
 			String line = reader.readLine();
@@ -113,6 +121,9 @@ public class AboutDialog extends JDialog implements HyperlinkListener {
 		}
 		MarkdownProcessor markdownProcessor = new MarkdownProcessor();
 		String html = markdownProcessor.markdown(markdownText.toString());
+		if (cssStyle != null) {
+			html = "<div style=\"" + cssStyle + "\">\n" + html + "</div>";
+		}
 		HtmlPane htmlPane = new HtmlPane(html);
 		this.htmlPanes.add(htmlPane);
 	}
