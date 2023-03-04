@@ -13,8 +13,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -109,8 +113,20 @@ public class AboutDialog extends JDialog implements HyperlinkListener {
 	}
 	
 	public void addMarkdownContent(File markdownFile, String cssStyle) {
+		try {
+			addMarkdownContent(new FileInputStream(markdownFile), cssStyle);
+		} catch (FileNotFoundException e) {
+			log.error("Unable to get input stream for markdown file.", e);
+		}
+	}
+	
+	public void addMarkdownContent(InputStream inputStream) {
+		addMarkdownContent(inputStream, null);
+	}
+	
+	public void addMarkdownContent(InputStream inputStream, String cssStyle) {
 		StringBuilder markdownText = new StringBuilder();
-		try (BufferedReader reader = new BufferedReader(new FileReader(markdownFile))) {
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
 			String line = reader.readLine();
 			while (line != null) {
 				markdownText.append(line).append("\n");
@@ -125,7 +141,7 @@ public class AboutDialog extends JDialog implements HyperlinkListener {
 			html = "<div style=\"" + cssStyle + "\">\n" + html + "</div>";
 		}
 		HtmlPane htmlPane = new HtmlPane(html);
-		this.htmlPanes.add(htmlPane);
+		this.htmlPanes.add(htmlPane);		
 	}
 	
 	public void build() {
