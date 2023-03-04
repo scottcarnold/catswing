@@ -41,9 +41,9 @@ import org.xandercat.swing.util.ResourceManager;
 public class LoggingConfigurer {
 	
 	private static final Logger log = LogManager.getLogger(LoggingConfigurer.class);
-	private static String CONSOLE_TEMPLATE_XML = "config/console.xml";
-	private static String FILE_TEMPLATE_XML = "config/file.xml";
-	private static String WINDOW_TEMPLATE_XML = "config/window.xml";
+	private static String CONSOLE_TEMPLATE_XML = "/log/console.xml";
+	private static String FILE_TEMPLATE_XML = "/log/file.xml";
+	private static String WINDOW_TEMPLATE_XML = "/log/window.xml";
 	private static File LOG4J2_CONFIG_FILE = new File("Log4j2.xml");
 	
 	public static enum Target { 
