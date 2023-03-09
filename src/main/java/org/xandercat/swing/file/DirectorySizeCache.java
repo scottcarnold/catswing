@@ -4,6 +4,9 @@ import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+
+import javax.xml.ws.handler.Handler;
 
 
 /**
@@ -101,12 +104,11 @@ public class DirectorySizeCache {
 		return size;
 	}
 	
-	public void loadDirectorySizeAnsync(final File directory) {
-		Runnable loadDirectorySizeRunnable = new Runnable() {
-			public void run() {
-				loadDirectorySize(directory);
-			}
-		};
-		new Thread(loadDirectorySizeRunnable).start();
+	public void loadDirectorySizeAsync(final File directory) {
+		new Thread(() -> loadDirectorySize(directory)).start();
+	}
+	
+	public void loadDirectorySizeAsync(final File directory, DirectorySizeHandler handler) {
+		new Thread(() -> handler.directorySizeLoaded(directory, loadDirectorySize(directory))).start();
 	}
 }

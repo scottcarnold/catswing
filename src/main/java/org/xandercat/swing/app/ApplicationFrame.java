@@ -30,6 +30,10 @@ import org.xandercat.swing.util.PlatformTool;
  * <li>Allows close listeners to fully complete even when launching dialogs.</li>
  * <li>Application ultimately exits using a call to System.exit(0).</li>  
  * </ol>
+ * ApplicationFrame also provides limited support for setting status message on a splash screen.  
+ * Set the splash screen in the manifest (SplashScreen-Image) and use the setSplashStatus method to 
+ * overlay loading messages on to the splash image.  Splash messages will overlay the bottom of the
+ * splash image. 
  * 
  * @author Scott C Arnold
  */
@@ -104,7 +108,7 @@ public class ApplicationFrame extends JFrame implements WindowListener {
 		}
 		super.setVisible(visible);
 	}
-
+	
 	/**
 	 * Sets the font to use for splash status text.
 	 * 

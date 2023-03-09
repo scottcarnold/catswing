@@ -2,12 +2,15 @@ package org.xandercat.swing.table;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 import javax.swing.SwingWorker;
 
 import org.xandercat.swing.file.DirectorySizeCache;
+import org.xandercat.swing.file.DirectorySizeHandler;
 import org.xandercat.swing.file.FilesSize;
 
 /**
@@ -19,13 +22,15 @@ import org.xandercat.swing.file.FilesSize;
  * 
  * @author Scott C Arnold
  */
-public class FileTableModelLoader extends SwingWorker<Void,FileData> {
+public class FileTableModelLoader extends SwingWorker<Void,FileData> implements DirectorySizeHandler {
 
 	private FileTableModel model;
 	private File[] files;
 	private boolean useDirectorySizeCache;
 	private DirectorySizeCache directorySizeCache;
 	private List<FileTableModelLoaderListener> listeners = new ArrayList<FileTableModelLoaderListener>();
+	private CountDownLatch countDownLatch;
+	private Map<File, FileData> loadingDirectories;
 	
 	public FileTableModelLoader(FileTableModel model, File[] files, boolean useDirectorySizeCache) {
 		this.model = model;
@@ -46,7 +51,7 @@ public class FileTableModelLoader extends SwingWorker<Void,FileData> {
 	
 	@Override
 	protected Void doInBackground() throws Exception {
-		List<FileData> loadingDirectories = new ArrayList<FileData>();
+		this.loadingDirectories = new HashMap<File, FileData>();
 		for (File file : files) {
 			FileData data = new FileData(file);
 			if (file.isDirectory() && this.useDirectorySizeCache) {
@@ -55,25 +60,17 @@ public class FileTableModelLoader extends SwingWorker<Void,FileData> {
 					data.setLength(directorySize.getBytes());
 				} else {
 					data.setLength(null);
-					this.directorySizeCache.loadDirectorySizeAnsync(file);
-					loadingDirectories.add(data);
+					loadingDirectories.put(file, data);
 				}
 			}
 			publish(data);
 		}
-		while (loadingDirectories.size() > 0) {
-			// wait around for directory sizes to load
-			// TODO: Polling like this is sloppy, clean it up
-			Thread.sleep(500);
-			for (Iterator<FileData> iter = loadingDirectories.iterator(); iter.hasNext();) {
-				FileData directoryData = iter.next();
-				FilesSize directorySize = this.directorySizeCache.getDirectorySize(directoryData.getFile());
-				if (directorySize != null) {
-					directoryData.setLength(directorySize.getBytes());
-					iter.remove();
-					publish(directoryData);
-				}
+		if (loadingDirectories.size() > 0) {
+			this.countDownLatch = new CountDownLatch(loadingDirectories.size());
+			for (File directory : loadingDirectories.keySet()) {
+				this.directorySizeCache.loadDirectorySizeAsync(directory, this);
 			}
+			this.countDownLatch.await();
 		}
 		return null;
 	}
@@ -97,5 +94,13 @@ public class FileTableModelLoader extends SwingWorker<Void,FileData> {
 			}			
 		}
 		listeners.clear();
+	}
+
+	@Override
+	public void directorySizeLoaded(File directory, FilesSize size) {
+		FileData directoryData = this.loadingDirectories.get(directory);
+		directoryData.setLength(size.getBytes());
+		publish(directoryData);
+		this.countDownLatch.countDown();
 	}
 }
