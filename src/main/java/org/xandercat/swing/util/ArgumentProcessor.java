@@ -33,18 +33,8 @@ public class ArgumentProcessor {
 			return toString(20);
 		}
 		public String toString(int valueHintLength) {
-			int padLength = (valueHint == null)? valueHintLength : Math.max(0, valueHintLength - valueHint.length());
-			StringBuilder sb = new StringBuilder();
-			for (int i=0; i<padLength; i++) {
-				sb.append(' ');
-			}
-			if (valueHint != null) {
-				sb.append(valueHint);
-			}
-			if (description != null) {
-				sb.append(": ").append(description);
-			}
-			return sb.toString();
+			return ArgumentProcessor.padRight(valueHint, valueHintLength)
+					+ " : " + description;
 		}
 	}
 	
@@ -151,6 +141,17 @@ public class ArgumentProcessor {
 		}
 	}
 	
+	private static String padRight(String s, int len) {
+		StringBuilder sb = new StringBuilder();
+		if (s != null) {
+			sb.append(s);
+		}
+		while (sb.length() < len) {
+			sb.append(" ");
+		}
+		return sb.toString();
+	}
+	
 	/**
 	 * Process the command-line arguments.  Call this method after adding all valid switches.
 	 * If the terminate-on-invalid-switch flag is set and an invalid argument is present in the
@@ -194,8 +195,18 @@ public class ArgumentProcessor {
 				System.out.println();
 			}
 			System.out.println("Valid command line switches:");
+			int maxArgLength = 0;
+			for (String key : switchDefinitions.keySet()) {
+				maxArgLength = Math.max(maxArgLength, key.length());
+			}
+			int maxValueHintLength = 0;
+			for (SwitchDefinition switchDefinition : switchDefinitions.values()) {
+				int valueHintLength = (switchDefinition.valueHint == null)? 0 : switchDefinition.valueHint.length();
+				maxValueHintLength = Math.max(maxValueHintLength, valueHintLength);
+			}
+			maxValueHintLength = Math.min(24, maxValueHintLength);
 			for (Map.Entry<String,SwitchDefinition> entry : switchDefinitions.entrySet()) {
-				System.out.println("\t" + entry.getKey() + "\t" + entry.getValue().toString());
+				System.out.println("  " + padRight(entry.getKey(), maxArgLength) + "  " + entry.getValue().toString(maxValueHintLength));
 			}
 			System.out.println();
 			System.exit(0);

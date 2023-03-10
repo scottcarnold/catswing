@@ -175,7 +175,7 @@ public class LoggingConfigurer {
 				.map(target -> target.name)
 				.collect(Collectors.joining("|"))
 				.replace(Target.FILE.name, Target.FILE.name + ":[fileName]");
-		argumentProcessor.addValidSwitchValuePair(switchKey, hint, "sets logging target", null);
+		argumentProcessor.addValidSwitchValuePair(switchKey, hint, "sets logging target (requires restart to take effect)", null);
 	}
 	
 	/**
