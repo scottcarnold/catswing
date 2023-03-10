@@ -81,6 +81,10 @@ public class SwingFileCopier extends SwingWorker<Void, SwingFileCopierEvent> imp
 		fileCopier.enableTestMode();
 	}
 	
+	public void enableTestMode(long speedFactor) {
+		fileCopier.enableTestMode(speedFactor);
+	}
+	
 	public void cancel() {
 		fileCopier.cancel();
 	}

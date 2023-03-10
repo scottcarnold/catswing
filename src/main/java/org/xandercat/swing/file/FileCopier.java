@@ -59,6 +59,7 @@ public class FileCopier {
 	private List<FileCopyListener> listeners;
 	private List<FileCopyProgressListener> progressListeners;
 	private boolean testMode = false;
+	private long testModeSpeedFactor = 10000;
 	private volatile boolean cancelled = false;
 	private long channelBufferSize = DEFAULT_CHANNEL_BUFFER_SIZE;
 	
@@ -182,7 +183,7 @@ public class FileCopier {
 		final long partialSize = 1000;
 		// simulate some copy time
 		try {
-			Thread.sleep(Math.min(3000, inFile.length()/20000));
+			Thread.sleep(Math.min(3000, inFile.length()/(2*testModeSpeedFactor)));
 		} catch (InterruptedException ie) { }
 		// fire copyProgress for partial copy (or full copy if file is small)
 		fireCopyProgress(inFile, outFile, partialSize, partialSize >= inFile.length());
@@ -195,7 +196,7 @@ public class FileCopier {
 		}
 		// simulate remaining copy time
 		try {
-			Thread.sleep(Math.min(3000, inFile.length()/20000));
+			Thread.sleep(Math.min(3000, inFile.length()/(2*testModeSpeedFactor)));
 		} catch (InterruptedException ie) { }
 		// fire final copyProgress for full copy
 		fireCopyProgress(inFile, outFile, inFile.length()-partialSize, true);
@@ -322,6 +323,14 @@ public class FileCopier {
 	 */
 	public void enableTestMode() {
 		this.testMode = true;
+	}
+	
+	public void enableTestMode(long speedFactor) {
+		if (speedFactor < 1) {
+			throw new IllegalArgumentException("Speed factor must be > 0");
+		}
+		this.testMode = true;
+		this.testModeSpeedFactor = speedFactor;
 	}
 	
 	/**

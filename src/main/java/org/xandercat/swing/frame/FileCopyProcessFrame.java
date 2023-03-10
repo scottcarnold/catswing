@@ -96,6 +96,7 @@ public class FileCopyProcessFrame extends JFrame implements FileCopyListener, Wi
 	private int errorCount;
 	private boolean haltedDueToErrors;
 	private boolean testMode = false;
+	private long testModeSpeedFactor;
 	
 	public FileCopyProcessFrame(List<File> files, FileIconCache fileIconCache,
 			File destination, File source, boolean startCopyMinimized, boolean autoclose, int errorsUntilHalt) {
@@ -209,6 +210,11 @@ public class FileCopyProcessFrame extends JFrame implements FileCopyListener, Wi
 		this.testMode = true;
 	}
 	
+	public void enableTestMode(long speedFactor) {
+		this.testMode = true;
+		this.testModeSpeedFactor = speedFactor;
+	}
+	
 	public void addFileCopyListener(FileCopyListener listener) {
 		fileCopyListeners.add(listener);
 	}
@@ -241,7 +247,11 @@ public class FileCopyProcessFrame extends JFrame implements FileCopyListener, Wi
 				fileCopier = new SwingFileCopier(files, pathGenerator);
 			}
 			if (testMode) {
-				fileCopier.enableTestMode();
+				if (testModeSpeedFactor > 0) {
+					fileCopier.enableTestMode(testModeSpeedFactor);
+				} else {
+					fileCopier.enableTestMode();
+				}
 			}
 			fileCopier.addFileCopyListener(this);
 			for (FileCopyListener listener : this.fileCopyListeners) {
