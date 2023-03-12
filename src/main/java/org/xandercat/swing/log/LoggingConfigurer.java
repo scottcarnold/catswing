@@ -45,6 +45,7 @@ public class LoggingConfigurer {
 	private static String FILE_TEMPLATE_XML = "/log/file.xml";
 	private static String WINDOW_TEMPLATE_XML = "/log/window.xml";
 	private static File LOG4J2_CONFIG_FILE = new File("log4j2.xml");
+	private static File LOG4J2_CONFIG_TEMP_FILE = new File("log4j2-temp.xml");
 	
 	public static enum Target { 
 		OFF("off"), CONSOLE("console"), FILE("file"), WINDOW("window");
@@ -111,13 +112,25 @@ public class LoggingConfigurer {
 	}
 	
 	private static boolean writeLog4j2Configuration(String configXml) {
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(LOG4J2_CONFIG_FILE))) {
+		// first write the new config to the temporary file
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter(LOG4J2_CONFIG_TEMP_FILE))) {
 			writer.write(configXml);
 		} catch (IOException ioe) {
 			log.error("Unable to write to Log4j2 configuration file.  Configuration will not be updated.", ioe);
 			return false;
 		}
-		return true;
+		// now compare it to any existing log4j2.xml file to see if it is actually changed or not
+		if (LOG4J2_CONFIG_FILE.exists()) {
+			if (FileUtil.bitwiseEquals(LOG4J2_CONFIG_TEMP_FILE, LOG4J2_CONFIG_FILE)) {
+				// no changes, delete the new file
+				LOG4J2_CONFIG_TEMP_FILE.delete();
+				return false;
+			} else {
+				// changes confirmed, delete the old file
+				LOG4J2_CONFIG_FILE.delete();
+			}
+		}
+		return LOG4J2_CONFIG_TEMP_FILE.renameTo(LOG4J2_CONFIG_FILE);
 	}
 	
 	private static boolean configLogging(String templateXml, Level level, String fileName) {
@@ -191,6 +204,8 @@ public class LoggingConfigurer {
 	 * @param level                     logging level for root logger
 	 * @param defaultTarget             logging target when switch is not present
 	 * @param defaultFile               default file to log to if switch is not present and defaultTarget is FILE; can be left null if defaultTarget is not FILE
+	 * 
+	 * @return whether or not logging was reconfigured
 	 */	
 	public static boolean configureLogging(ArgumentProcessor argumentProcessor, String switchKey, Level level, Target defaultTarget, String defaultFileName) {
 		Target target = defaultTarget;

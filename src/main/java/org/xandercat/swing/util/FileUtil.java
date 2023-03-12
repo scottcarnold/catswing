@@ -1,6 +1,8 @@
 package org.xandercat.swing.util;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Collection;
@@ -22,6 +24,8 @@ import org.xandercat.swing.file.BinaryPrefix;
 /**
  * FileUtil provides various utility methods specific to working with files.
  *
+ * bitwiseEquals methods courtesy of Joe Orost (snoopyjc at www.velocityreviews.com).
+ * 
  * 	Some oddball stuff:
  * 	// for Mac "/", name = "" and parent is either null or blank, abs path is "/"
  *	// for PC "C:\", name = "" and parent is either null or blank, abs path is "C:\"
@@ -565,5 +569,113 @@ public class FileUtil {
 			}
 		}
 		return allFiles;
+	}
+	
+	/**
+	 * Return whether or not two input streams are bitwise equivalent.  If you expect to be doing multiple comparisons,
+	 * consider using the method that takes buffers as arguments so that the same buffers can be reused.
+	 * 
+	 * @param is1 the first input stream to compare
+	 * @param is2 the second input stream to compare
+	 * 
+	 * @return whether or not two files are bitwise equivalent
+	 */
+	public static boolean bitwiseEquals(InputStream is1, InputStream is2) {
+		return bitwiseEquals(is1, is2, new byte[2048], new byte[2048]);
+	}
+	
+	/**
+	 * Return whether or not two input streams are bitwise equivalent.  The size of the two byte buffers should be the same.
+	 * Use this method when you expect to be doing multiple comparisons such that the same byte buffers can be reused.
+	 * 
+	 * @param is1 the first input stream to compare
+	 * @param is2 the second input stream to compare
+	 * @param buffer1 a byte buffer to use for comparison
+	 * @param buffer2 a byte buffer to use for comparison
+	 * 
+	 * @return whether or not two input streams are bitwise equivalent
+	 */
+	public static boolean bitwiseEquals(InputStream is1, InputStream is2, byte[] buffer1, byte[] buffer2) {
+		if(is1 == is2) return true;
+		if(is1 == null && is2 == null) return true;
+		if(is1 == null || is2 == null) return false;
+		assert(buffer1 != null && buffer2 != null && buffer1.length == buffer2.length);
+		int bufferSize = buffer1.length;
+		try {
+			int read1 = -1;
+			int read2 = -1;
+
+			do {
+				int offset1 = 0;
+				while (offset1 < bufferSize
+               				&& (read1 = is1.read(buffer1, offset1, bufferSize-offset1)) >= 0) {
+            				offset1 += read1;
+        			}
+
+				int offset2 = 0;
+				while (offset2 < bufferSize
+               				&& (read2 = is2.read(buffer2, offset2, bufferSize-offset2)) >= 0) {
+            				offset2 += read2;
+        			}
+				if(offset1 != offset2) return false;
+				if(offset1 != bufferSize) {
+					Arrays.fill(buffer1, offset1, bufferSize, (byte)0);
+					Arrays.fill(buffer2, offset2, bufferSize, (byte)0);
+				}
+				if(!Arrays.equals(buffer1, buffer2)) return false;
+			} while(read1 >= 0 && read2 >= 0);
+			if(read1 < 0 && read2 < 0) return true;	// both at EOF
+			return false;
+
+		} catch (Exception ei) {
+			log.warn("Exception when comparing input streams.", ei);
+			return false;
+		}
+	}
+
+	/**
+	 * Return whether or not two files are bitwise equivalent.  If you expect to be doing multiple comparisons,
+	 * consider using the method that takes buffers as arguments so that the same buffers can be reused.
+	 * 
+	 * @param file1 the first file to compare
+	 * @param file2 the second file to compare
+	 * 
+	 * @return whether or not two files are bitwise equivalent
+	 */
+	public static boolean bitwiseEquals(File file1, File file2) {
+		return bitwiseEquals(file1, file2, new byte[2048], new byte[2048]);
+	}
+	
+	/**
+	 * Return whether or not two files are bitwise equivalent.  The size of the two byte buffers should be the same.
+	 * Use this method when you expect to be doing multiple comparisons such that the same byte buffers can be reused.
+	 * 
+	 * @param file1 the first file to compare
+	 * @param file2 the second file to compare
+	 * @param buffer1 a byte buffer to use for comparison
+	 * @param buffer2 a byte buffer to use for comparison
+	 * 
+	 * @return whether or not two files are bitwise equivalent
+	 */
+	public static boolean bitwiseEquals(File file1, File file2, byte[] buffer1, byte[] buffer2) {
+		InputStream is1 = null;
+		InputStream is2 = null;
+		if(file1.length() != file2.length()) return false;
+
+		try {
+			is1 = new FileInputStream(file1);
+			is2 = new FileInputStream(file2);
+
+			return bitwiseEquals(is1, is2, buffer1, buffer2);
+
+		} catch (Exception ei) {
+			log.warn("Exception when comparing files.", ei);
+			return false;
+		} finally {
+			try {
+				if(is1 != null) is1.close();
+				if(is2 != null) is2.close();
+			} catch (Exception ei2) {}
+		}
 	}
 }

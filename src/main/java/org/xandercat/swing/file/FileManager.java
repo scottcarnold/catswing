@@ -23,7 +23,6 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -44,6 +43,7 @@ import org.apache.logging.log4j.Logger;
 import org.xandercat.swing.app.ApplicationFrame;
 import org.xandercat.swing.app.CloseListener;
 import org.xandercat.swing.menu.RecentlyLoadedFilesManager;
+import org.xandercat.swing.util.FileUtil;
 
 /**
  * FileManager simplifies the process of managing a users open files.  FileManager takes care of 
@@ -63,9 +63,6 @@ import org.xandercat.swing.menu.RecentlyLoadedFilesManager;
  * into a new List and sorted before it is saved.  This prevents object order from affecting whether
  * or not a file is considered "dirty" and in need of a save.  This behavior can be disabled by 
  * calling setSaveListsInSortedOrder(false).
- * 
- * inputStreamEquals and fileContentsEquals methods courtesy of Joe Orost 
- * (snoopyjc at www.velocityreviews.com).
  * 
  * @author Scott Arnold
  */
@@ -955,7 +952,7 @@ public class FileManager<T> extends WindowAdapter implements WindowListener, Clo
 				File tempFile = File.createTempFile("temp", ".tmp");
 				tempFile.deleteOnExit();
 				saveObject(tempFile, getSavableObject(fileState));
-				if (!file.exists() || !fileContentsEquals(file, tempFile, buff1, buff2)) {
+				if (!file.exists() || !FileUtil.bitwiseEquals(file, tempFile, buff1, buff2)) {
 					// prompt for save of file
 					int choices = (this.parent instanceof ApplicationFrame)? JOptionPane.YES_NO_CANCEL_OPTION : JOptionPane.YES_NO_OPTION;
 					int result = JOptionPane.showConfirmDialog(parent, "Save " + getShortFilename(file) + " before closing?", "Confirm Close", choices);
@@ -1187,65 +1184,7 @@ public class FileManager<T> extends WindowAdapter implements WindowListener, Clo
 		}
 	}
 	
-	public static boolean inputStreamEquals(InputStream is1, InputStream is2, byte[] buffer1, byte[] buffer2) {
-		if(is1 == is2) return true;
-		if(is1 == null && is2 == null) return true;
-		if(is1 == null || is2 == null) return false;
-		assert(buffer1 != null && buffer2 != null && buffer1.length == buffer2.length);
-		int bufferSize = buffer1.length;
-		try {
-			int read1 = -1;
-			int read2 = -1;
 
-			do {
-				int offset1 = 0;
-				while (offset1 < bufferSize
-               				&& (read1 = is1.read(buffer1, offset1, bufferSize-offset1)) >= 0) {
-            				offset1 += read1;
-        			}
-
-				int offset2 = 0;
-				while (offset2 < bufferSize
-               				&& (read2 = is2.read(buffer2, offset2, bufferSize-offset2)) >= 0) {
-            				offset2 += read2;
-        			}
-				if(offset1 != offset2) return false;
-				if(offset1 != bufferSize) {
-					Arrays.fill(buffer1, offset1, bufferSize, (byte)0);
-					Arrays.fill(buffer2, offset2, bufferSize, (byte)0);
-				}
-				if(!Arrays.equals(buffer1, buffer2)) return false;
-			} while(read1 >= 0 && read2 >= 0);
-			if(read1 < 0 && read2 < 0) return true;	// both at EOF
-			return false;
-
-		} catch (Exception ei) {
-			log.warn("Exception when comparing input streams.", ei);
-			return false;
-		}
-	}
-
-	public static boolean fileContentsEquals(File file1, File file2, byte[] buffer1, byte[] buffer2) {
-		InputStream is1 = null;
-		InputStream is2 = null;
-		if(file1.length() != file2.length()) return false;
-
-		try {
-			is1 = new FileInputStream(file1);
-			is2 = new FileInputStream(file2);
-
-			return inputStreamEquals(is1, is2, buffer1, buffer2);
-
-		} catch (Exception ei) {
-			log.warn("Exception when comparing files.", ei);
-			return false;
-		} finally {
-			try {
-				if(is1 != null) is1.close();
-				if(is2 != null) is2.close();
-			} catch (Exception ei2) {}
-		}
-	}
 
 	/**
 	 * Stop the autosaver if it's active and close all open files.  Programs using the File Manager
