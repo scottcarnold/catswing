@@ -3,6 +3,7 @@ package org.xandercat.swing.tree;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -18,7 +19,7 @@ public class CheckboxFileTreeRefreshNodeAction extends FileTreeRefreshNodeAction
 		super(tree, node);
 	}
 
-	public CheckboxFileTreeRefreshNodeAction(CheckboxFileTree tree, CheckboxFileTreeNode node, List<File> requiredFiles, List<File> requiredDirectories) {
+	public CheckboxFileTreeRefreshNodeAction(CheckboxFileTree tree, CheckboxFileTreeNode node, Collection<File> requiredFiles, Collection<File> requiredDirectories) {
 		this(tree, node);
 		// trim down the required files and directories to only those under the given node
 		String nodeFilePath = node.getFile().getAbsolutePath();
