@@ -11,9 +11,9 @@ import java.io.File;
  */
 public interface FileCopyListener {
 
-	public void fileCopying(File from, File to);
+	public void fileCopying(File from, File to, boolean isDirectory);
 
-	public void fileCopied(File from, File to, FileCopier.CopyResult result);
+	public void fileCopied(File from, File to, boolean isDirectory, FileCopier.CopyResult result);
 	
 	public void copyComplete(boolean resolutionRequired, boolean copyCancelled);
 }

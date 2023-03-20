@@ -117,7 +117,7 @@ public class FileOverwriteTableModel extends FileTableModel implements FileCopyL
 		}
 	}
 	
-	public void fileCopied(File from, File to, FileCopier.CopyResult result) {
+	public void fileCopied(File from, File to, boolean isDirectory, FileCopier.CopyResult result) {
 		if (result == FileCopier.CopyResult.ALREADY_EXISTS) {
 			JButton overwriteButton = new JButton();
 			JButton cancelButton = new JButton();
@@ -139,7 +139,7 @@ public class FileOverwriteTableModel extends FileTableModel implements FileCopyL
 		// nothing to do here
 	}
 	
-	public void fileCopying(File from, File to) {
+	public void fileCopying(File from, File to, boolean isDirectory) {
 		// nothing to do here
 	}	
 }

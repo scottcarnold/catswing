@@ -394,18 +394,18 @@ public class FileCopier {
 		return null;
 	}
 	
-	private void fireFileCopying(File from, File to) {
+	private void fireFileCopying(File from, File to, boolean isDirectory) {
 		if (listeners != null) {
 			for (FileCopyListener listener : listeners) {
-				listener.fileCopying(from, to);
+				listener.fileCopying(from, to, isDirectory);
 			}
 		}
 	}
 	
-	private void fireFileCopied(File from, File to, CopyResult result) {
+	private void fireFileCopied(File from, File to, boolean isDirectory, CopyResult result) {
 		if (listeners != null) {
 			for (FileCopyListener listener : listeners) {
-				listener.fileCopied(from, to, result);
+				listener.fileCopied(from, to, isDirectory, result);
 			}
 		}
 	}
@@ -513,7 +513,8 @@ public class FileCopier {
 		if (testMode) {
 			log.info("Simulating copy of file " + file.getAbsolutePath() + " to " + destFile.getAbsolutePath());
 		}
-		fireFileCopying(file, destFile);
+		boolean isDirectory = file.isDirectory();
+		fireFileCopying(file, destFile, isDirectory);
 		boolean copied = false;
 		//note: overwrite flag is only true after the first pass; for that reason, it is not necessary
 		//      to check for a skipped file when overwrite is true as it would have been caught in the first pass.
@@ -521,10 +522,10 @@ public class FileCopier {
 			if (destFile.isDirectory() ||
 					(destFile.length() == file.length() && destFile.lastModified() == file.lastModified())) {
 				skippedFiles.add(file);
-				fireFileCopied(file, destFile, CopyResult.SKIPPED);
+				fireFileCopied(file, destFile, isDirectory, CopyResult.SKIPPED);
 			} else {
 				overwriteFiles.add(file);
-				fireFileCopied(file, destFile, CopyResult.ALREADY_EXISTS);
+				fireFileCopied(file, destFile, isDirectory, CopyResult.ALREADY_EXISTS);
 			}
 		} else {
 			try {
@@ -535,7 +536,7 @@ public class FileCopier {
 				}
 				if (copied) {
 					copiedFiles.add(destFile);
-					fireFileCopied(file, destFile, CopyResult.COPIED);
+					fireFileCopied(file, destFile, isDirectory, CopyResult.COPIED);
 					try {
 						if (!testMode) {
 							destFile.setLastModified(file.lastModified());
@@ -547,7 +548,7 @@ public class FileCopier {
 			} catch (Exception e) {
 				log.info("File copy error", e);
 				errorFiles.add(new FileCopyError(file, e));
-				fireFileCopied(file, destFile, CopyResult.ERROR);
+				fireFileCopied(file, destFile, isDirectory, CopyResult.ERROR);
 			}
 		}		
 		return copied;

@@ -97,6 +97,9 @@ public class FileCopyProcessFrame extends JFrame implements FileCopyListener, Wi
 	private boolean haltedDueToErrors;
 	private boolean testMode = false;
 	private long testModeSpeedFactor;
+	private long nextCountUpdate = 0;
+	final private long countIntervalMs = 500;
+	private boolean logCopiedFilesWithoutAbsolutePaths;
 	
 	public FileCopyProcessFrame(List<File> files, FileIconCache fileIconCache,
 			File destination, File source, boolean startCopyMinimized, boolean autoclose, int errorsUntilHalt) {
@@ -215,6 +218,10 @@ public class FileCopyProcessFrame extends JFrame implements FileCopyListener, Wi
 		this.testModeSpeedFactor = speedFactor;
 	}
 	
+	public void setLogCopiedFilesWithoutAbsolutePaths(boolean logCopiedFilesWithoutAbsolutePaths) {
+		this.logCopiedFilesWithoutAbsolutePaths = logCopiedFilesWithoutAbsolutePaths;
+	}
+	
 	public void addFileCopyListener(FileCopyListener listener) {
 		fileCopyListeners.add(listener);
 	}
@@ -307,41 +314,39 @@ public class FileCopyProcessFrame extends JFrame implements FileCopyListener, Wi
 		return haltedDueToErrors;
 	}
 	
-	public void fileCopying(File from, File to) {
-		if (from.isDirectory()) {
+	public void fileCopying(File from, File to, boolean isDirectory) {
+		if (isDirectory) {
 			messageScrollPane.addMessage("Creating directory " + to.getAbsolutePath());
 		} else {
-			messageScrollPane.addMessage("Copying file " + from.getAbsolutePath());
+			if (logCopiedFilesWithoutAbsolutePaths) {
+				messageScrollPane.addMessage("Copying file " + from.getName());
+			} else {
+				messageScrollPane.addMessage("Copying file " + from.getAbsolutePath());
+			}
 		}
 	}
 
-	public void fileCopied(File from, File to, FileCopier.CopyResult result) {
+	public void fileCopied(File from, File to, boolean isDirectory, FileCopier.CopyResult result) {
 		processed++;
 		String resultTag = result.toString();
 		switch (result) {
 		case ALREADY_EXISTS:
-			filesAlreadyExistCounterLabel.setText(String.valueOf(fileCopier.getOverwriteFiles().size()));
 			break;
 		case COPIED:
-			if (from.isDirectory()) {
+			if (isDirectory) {
 				directoriesCreated++;
-				directoriesCreatedCounterLabel.setText(String.valueOf(directoriesCreated));
 				resultTag = "CREATED";
 			} else {
 				filesCopied++;
-				filesCopiedCounterLabel.setText(String.valueOf(filesCopied));
 			}
 			break;
 		case ERROR:
 			errorCount++;
-			copyErrorsCounterLabel.setText(String.valueOf(errorCount));
 			break;
 		case SKIPPED:
-			skippedCounterLabel.setText(String.valueOf(fileCopier.getSkippedFiles().size()));
 			break;
 		}
 		messageScrollPane.appendMessage(" [" + resultTag + "]");
-		setTitle(processed + "/" + toProcess + " processed");
 		if (errorCount > 0 && errorCount % errorsUntilHalt == 0) {
 			int choice = JOptionPane.showConfirmDialog(this, 
 					errorCount + " copy errors have occurred.  Do you wish to continue the copy process?", 
@@ -353,6 +358,19 @@ public class FileCopyProcessFrame extends JFrame implements FileCopyListener, Wi
 				fileCopier.cancel();
 			}
 		}
+		if (System.currentTimeMillis() > nextCountUpdate) {
+			updateCounts();
+			nextCountUpdate = System.currentTimeMillis() + countIntervalMs;
+		}
+	}
+	
+	private void updateCounts() {
+		filesAlreadyExistCounterLabel.setText(String.valueOf(fileCopier.getOverwriteFiles().size()));
+		directoriesCreatedCounterLabel.setText(String.valueOf(directoriesCreated));
+		filesCopiedCounterLabel.setText(String.valueOf(filesCopied));
+		copyErrorsCounterLabel.setText(String.valueOf(errorCount));
+		skippedCounterLabel.setText(String.valueOf(fileCopier.getSkippedFiles().size()));
+		setTitle(processed + "/" + toProcess + " processed");
 	}
 	
 	public void copyComplete(boolean resolutionRequired, boolean copyCancelled) {

@@ -129,7 +129,7 @@ public class FileErrorTableModel extends FileTableModel implements FileCopyListe
 		}
 	}
 	
-	public void fileCopied(File from, File to, FileCopier.CopyResult result) {
+	public void fileCopied(File from, File to, boolean isDirectory, FileCopier.CopyResult result) {
 		if (result == FileCopier.CopyResult.ERROR) {
 			JButton retryButton = new JButton();
 			JButton cancelButton = new JButton();
@@ -155,7 +155,7 @@ public class FileErrorTableModel extends FileTableModel implements FileCopyListe
 		// nothing to do here
 	}
 	
-	public void fileCopying(File from, File to) {
+	public void fileCopying(File from, File to, boolean isDirectory) {
 		// nothing to do here
 	}		
 }

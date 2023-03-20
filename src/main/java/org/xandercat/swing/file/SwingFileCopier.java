@@ -127,13 +127,13 @@ public class SwingFileCopier extends SwingWorker<Void, SwingFileCopierEvent> imp
 	
 	private void fireFileCopied(SwingFileCopierEvent event) {
 		for (FileCopyListener listener : fileCopyListeners) {
-			listener.fileCopied(event.getFrom(), event.getTo(), event.getCopyResult());
+			listener.fileCopied(event.getFrom(), event.getTo(), event.isDirectory(), event.getCopyResult());
 		}
 	}
 	
 	private void fireFileCopying(SwingFileCopierEvent event) {
 		for (FileCopyListener listener : fileCopyListeners) {
-			listener.fileCopying(event.getFrom(), event.getTo());
+			listener.fileCopying(event.getFrom(), event.getTo(), event.isDirectory());
 		}
 	}
 	
@@ -149,10 +149,10 @@ public class SwingFileCopier extends SwingWorker<Void, SwingFileCopierEvent> imp
 		publish(event);
 	}
 
-	public void fileCopied(File from, File to, CopyResult copyResult) {
+	public void fileCopied(File from, File to, boolean isDirectory, CopyResult copyResult) {
 		if (isDone()) {
 			final SwingFileCopierEvent event = new SwingFileCopierEvent();
-			event.setCopiedType(from, to, copyResult);
+			event.setCopiedType(from, to, isDirectory, copyResult);
 			SwingUtilities.invokeLater(new Runnable() {
 				public void run() {
 					fireFileCopied(event);
@@ -160,15 +160,15 @@ public class SwingFileCopier extends SwingWorker<Void, SwingFileCopierEvent> imp
 			});
 		} else {
 			SwingFileCopierEvent event = new SwingFileCopierEvent();
-			event.setCopiedType(from, to, copyResult);
+			event.setCopiedType(from, to, isDirectory, copyResult);
 			publish(event);	
 		}
 	}
 
-	public void fileCopying(File from, File to) {
+	public void fileCopying(File from, File to, boolean isDirectory) {
 		if (isDone()) {
 			final SwingFileCopierEvent event = new SwingFileCopierEvent();
-			event.setCopyingType(from, to);		
+			event.setCopyingType(from, to, isDirectory);		
 			SwingUtilities.invokeLater(new Runnable() {
 				public void run() {
 					fireFileCopying(event);
@@ -176,7 +176,7 @@ public class SwingFileCopier extends SwingWorker<Void, SwingFileCopierEvent> imp
 			});			
 		} else {
 			SwingFileCopierEvent event = new SwingFileCopierEvent();
-			event.setCopyingType(from, to);
+			event.setCopyingType(from, to, isDirectory);
 			publish(event);		
 		}
 	}

@@ -11,6 +11,7 @@ public class SwingFileCopierEvent {
 	private Type type;
 	private File from;
 	private File to;
+	private boolean isDirectory;
 	private FileCopier.CopyResult copyResult;
 	private boolean resolutionRequired;
 	private long bytesCopied;
@@ -20,16 +21,18 @@ public class SwingFileCopierEvent {
 	public SwingFileCopierEvent() {
 	}
 	
-	public void setCopyingType(File from, File to) {
+	public void setCopyingType(File from, File to, boolean isDirectory) {
 		this.type = Type.COPYING;
 		this.from = from;
 		this.to = to;
+		this.isDirectory = isDirectory;
 	}
 	
-	public void setCopiedType(File from, File to, FileCopier.CopyResult copyResult) {
+	public void setCopiedType(File from, File to, boolean isDirectory, FileCopier.CopyResult copyResult) {
 		this.type = Type.COPIED;
 		this.from = from;
 		this.to = to;
+		this.isDirectory = isDirectory;
 		this.copyResult = copyResult;
 	}
 	
@@ -59,6 +62,10 @@ public class SwingFileCopierEvent {
 		return to;
 	}
 
+	public boolean isDirectory() {
+		return isDirectory;
+	}
+	
 	public FileCopier.CopyResult getCopyResult() {
 		return copyResult;
 	}
