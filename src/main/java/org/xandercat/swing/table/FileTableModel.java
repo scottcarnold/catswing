@@ -9,6 +9,7 @@ import java.util.List;
 import javax.swing.table.AbstractTableModel;
 
 import org.xandercat.swing.file.DirectorySizeCache;
+import org.xandercat.swing.util.PlatformTool;
 import org.xandercat.swing.worker.SwingWorkerUtil;
 
 /**
@@ -76,7 +77,7 @@ public class FileTableModel extends AbstractTableModel {
 			throw new IllegalArgumentException("The file passed to setDirectory must be a directory.");
 		}
 		this.directory = directory;
-		File[] files = (directory == null)? null : directory.listFiles();
+		File[] files = (directory == null)? null : directory.listFiles(PlatformTool.FILE_FILTER);
 		elements.clear();
 		if (files != null) {
 			if (loader != null && !loader.isDone()) {

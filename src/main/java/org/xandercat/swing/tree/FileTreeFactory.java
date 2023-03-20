@@ -7,6 +7,7 @@ import java.util.List;
 import javax.swing.tree.DefaultTreeModel;
 
 import org.xandercat.swing.file.icon.FileIconCache;
+import org.xandercat.swing.util.PlatformTool;
 
 /**
  * FileTreeFactory is a factory for creating file tree nodes and file trees starting at 
@@ -99,7 +100,7 @@ public class FileTreeFactory {
 		List<FileTreeNode> children = new ArrayList<FileTreeNode>();
 		File file = node.getFile();
 		if (file != null) {
-			File[] childFiles = file.listFiles();
+			File[] childFiles = file.listFiles(PlatformTool.FILE_FILTER);
 			if (childFiles != null) {
 				for (File childFile : childFiles) {
 					if ((!directoriesOnly || childFile.isDirectory())

@@ -68,8 +68,7 @@ public class FileUtil {
 	}
 	
 	/**
-	 * Get the name of the given file without the full absolute path.  Directory names will
-	 * be proceeded by a File.separator character.
+	 * Get the name of the given file without the full absolute path.  
 	 * 
 	 * @param file		file to get name for
 	 * 
@@ -80,10 +79,11 @@ public class FileUtil {
 	}
 
 	/**
-	 * Get the name of the given file without the full absolute path.  Directory names will
-	 * be proceeded by a File.separator character.  Length of returned string will not exceed
-	 * the given maxLength (names that would be longer than maxLength are truncated from the 
-	 * front and proceeded with "...").
+	 * Get the name of the given file without the full absolute path.  Root paths are returned without
+	 * the trailing separator.  
+	 * 
+	 * Length of returned string will not exceed the given maxLength (names that would be longer 
+	 * than maxLength are truncated from the  front and proceeded with "...").
 	 * 
 	 * @param file		file to get name for
 	 * @param maxLength	maximum length of returned string
@@ -97,11 +97,9 @@ public class FileUtil {
 		String name = null;
 		if (Boolean.TRUE.equals(isDirectory(file))) {
 			if (isDirectoryRootPath(file)) {
-				name = file.getAbsolutePath().substring(0, file.getAbsolutePath().length()-1);
-			} else if ((file.getAbsolutePath().indexOf(File.separator) >= 0)) {
-				String path = file.getAbsolutePath();
-				int i = path.lastIndexOf(File.separator);
-				name = (i >= 0)? path.substring(path.lastIndexOf(File.separator)+File.separator.length()) : path;
+				name = file.getAbsolutePath().substring(0, file.getAbsolutePath().length()-File.separator.length());
+			} else {
+				name = file.getName();
 			} 
 		} else {
 			if (file.getName() != null && file.getName().length() > 0) {
@@ -560,6 +558,7 @@ public class FileUtil {
 	 * Use this method with caution.
 	 * 
 	 * @param files		list of files and directories
+	 * @param ignoreSystemFiles  whether or not to ignore system files
 	 * 
 	 * @return			list of all files with directories recursed
 	 */
@@ -567,7 +566,7 @@ public class FileUtil {
 		Set<File> allFiles = new HashSet<File>();
 		for (File file : files) {
 			if (file.isDirectory()) {
-				File[] subFiles = file.listFiles();
+				File[] subFiles = file.listFiles(PlatformTool.FILE_FILTER);
 				if (subFiles != null) {
 					allFiles.addAll(getAllFiles(Arrays.asList(subFiles)));
 				}

@@ -4,9 +4,8 @@ import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
 
-import javax.xml.ws.handler.Handler;
+import org.xandercat.swing.util.PlatformTool;
 
 
 /**
@@ -88,7 +87,7 @@ public class DirectorySizeCache {
 			return size;
 		}
 		size = new FilesSize();
-		File[] subFiles = directory.listFiles();
+		File[] subFiles = directory.listFiles(PlatformTool.FILE_FILTER);
 		if (subFiles != null) {
 			for (File subFile : subFiles) {
 				if (subFile.isDirectory()) {

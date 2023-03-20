@@ -8,6 +8,7 @@ import javax.swing.SwingWorker;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.xandercat.swing.util.PlatformTool;
 
 /**
  * FilesSizeCalculator processes a list of files, fully recursing any directories, to compute
@@ -112,7 +113,7 @@ public class FilesSizeCalculator extends SwingWorker<FilesSize, File> {
 		}
 		publish(file);
 		ds = new FilesSize();
-		File[] children = file.listFiles();
+		File[] children = file.listFiles(PlatformTool.FILE_FILTER);
 		if (children != null) {
 			this.queuedFileCount += children.length;
 			for (File child : children) {

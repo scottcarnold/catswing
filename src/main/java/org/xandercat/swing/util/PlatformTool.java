@@ -2,9 +2,14 @@ package org.xandercat.swing.util;
 
 import java.awt.Window;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -30,11 +35,81 @@ import com.apple.eawt.QuitResponse;
  */
 public class PlatformTool {
 
-	public static enum MenuItemType {
-		ABOUT, EXIT, PREFERENCES;
+	private static final Set<String> SYSTEM_FILENAMES = new HashSet<String>();
+	private static boolean ignoreSystemFiles = false;
+	
+	static {
+		SYSTEM_FILENAMES.add(".DS_Store");
 	}
 	
+	public static enum MenuItemType {
+		ABOUT, EXIT, PREFERENCES;
+	};
+	
+	public static final FileFilter FILE_FILTER = new FileFilter() {
+		@Override
+		public boolean accept(File pathname) {
+			if (ignoreSystemFiles) {
+				return !PlatformTool.isSystemFile(pathname);
+			}
+			return true;
+		}	
+	};
+	
+	public static FilenameFilter FILENAME_FILTER = new FilenameFilter() {
+		@Override
+		public boolean accept(File dir, String name) {
+			if (ignoreSystemFiles) {
+				return !PlatformTool.isSystemFilename(name);
+			}
+			return true;
+		}
+	};
+	
 	private static final String osName = System.getProperty("os.name");
+	
+	/**
+	 * When set to true, file handling classes throughout the CatSwing library will
+	 * ignore "system files" such as the Mac ".DS_Store" file.  This can be 
+	 * extended beyond CatSwing by using PlatformTool.FILE_FILTER and PlatformTool.FILENAME_FILTER.
+	 * 
+	 * @param ignoreSystemFiles whether or not to ignore system files
+	 */
+	public static void setIgnoreSystemFiles(boolean ignoreSystemFiles) {
+		PlatformTool.ignoreSystemFiles = ignoreSystemFiles;
+	}
+	
+	/**
+	 * Return whether or not a file of given filename is considered to be a generic system file.
+	 * 
+	 * @param filename    filename to check
+	 * 
+	 * @return whether or not filename is considered to be a generic system file filename.
+	 */
+	public static boolean isSystemFilename(String filename) {
+		if (filename == null) {
+			return false;
+		}
+		int i = filename.lastIndexOf(File.separator);
+		if (i >= 0) {
+			filename = filename.substring(i+File.separator.length());
+		}
+		return SYSTEM_FILENAMES.contains(filename);
+	}
+	
+	/**
+	 * Return whether or not the given file is considered to be a generic system file.
+	 * 
+	 * @param file    file to check
+	 * 
+	 * @return whether or not file is considered to be a generic system file.
+	 */
+	public static boolean isSystemFile(File file) {
+		if (file == null) {
+			return false;
+		}
+		return SYSTEM_FILENAMES.contains(file.getName());
+	}
 	
 	/**
 	 * Return whether the platform is use is Apple Mac.
