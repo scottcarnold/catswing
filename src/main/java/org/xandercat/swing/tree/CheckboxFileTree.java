@@ -160,6 +160,32 @@ public class CheckboxFileTree extends FileTree implements MouseListener {
 		}
 		return files;
 	}
+
+	/**
+	 * Return a count of the number of selected nodes in the tree that represent
+	 * invalid files.  
+	 * 
+	 * @return number of selected invalid files
+	 */
+	public int getInvalidSelectionCount() {
+		CheckboxFileTreeNode root = (CheckboxFileTreeNode) getModel().getRoot();
+		return getInvalidSelectionCount(root);
+	}
+	
+	private int getInvalidSelectionCount(CheckboxFileTreeNode node) {
+		int invalidCount = 0;
+		for (Enumeration e = node.children(); e.hasMoreElements();) {
+			CheckboxFileTreeNode child = (CheckboxFileTreeNode) e.nextElement();
+			if (child.isSelected()) {
+				if (child.isInvalid()) {
+					invalidCount++;
+				}
+			} else if (child.getSelectedDescendantsCount() > 0) {
+				invalidCount += getInvalidSelectionCount(child);
+			}
+		}
+		return invalidCount;
+	}
 	
 	/**
 	 * This method is called by CheckboxFileTreeNodes whose selected attribute was changed
