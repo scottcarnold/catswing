@@ -96,10 +96,12 @@ public class FileUtil {
 		}
 		String name = null;
 		if (Boolean.TRUE.equals(isDirectory(file))) {
-			if ((file.getAbsolutePath().indexOf(File.separator) >= 0) && !isDirectoryRootPath(file)) {
+			if (isDirectoryRootPath(file)) {
+				name = file.getAbsolutePath().substring(0, file.getAbsolutePath().length()-1);
+			} else if ((file.getAbsolutePath().indexOf(File.separator) >= 0)) {
 				String path = file.getAbsolutePath();
 				int i = path.lastIndexOf(File.separator);
-				name = (i >= 0)? path.substring(path.lastIndexOf(File.separator)) : path;
+				name = (i >= 0)? path.substring(path.lastIndexOf(File.separator)+File.separator.length()) : path;
 			} 
 		} else {
 			if (file.getName() != null && file.getName().length() > 0) {
@@ -107,7 +109,12 @@ public class FileUtil {
 			}
 		}
 		if (name == null) {
-			name = file.getAbsolutePath();
+			if (file.getAbsolutePath().endsWith(File.separator)) {
+				// can happen with root path that doesn't exist; should remove separator
+				name = file.getAbsolutePath().substring(0, file.getAbsolutePath().length()-File.separator.length());				
+			} else {
+				name = file.getAbsolutePath();
+			}
 		}
 		if (maxLength > 0 && name.length() > maxLength) {
 			name = "..." + name.substring(Math.min(name.length(), name.length() - maxLength + 3)); 

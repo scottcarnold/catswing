@@ -62,6 +62,14 @@ public class FileIconSet {
 		return (this.folderOpenResource == null)? this.folderResource : this.folderOpenResource;
 	}
 	
+	public Resource getFolderResource() {
+		return this.folderResource;
+	}
+	
+	public Resource getDriveResource() {
+		return this.driveResource;
+	}
+	
 	public void setOverlayImage(FileIconOverlayType overlayType, String imageFilename) {
 		this.overlayMap.put(overlayType, new Resource(resourcePathRoot + imageFilename));
 	}

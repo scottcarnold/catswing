@@ -234,8 +234,17 @@ public class CheckboxFileTree extends FileTree implements MouseListener {
 				index++;
 			}
 			while (pci < pathComponents.length) {
-				//File newFile = new File(node.getFile().getAbsolutePath() + File.separator + pathComponents[pci]);
-				CheckboxFileTreeNode newNode = (CheckboxFileTreeNode) factory.createNode(node, file);
+				StringBuilder filePath = new StringBuilder();
+				if (node.getFile() != null) {
+					filePath.append(node.getFile().getAbsolutePath()).append(File.separator);
+				}
+				filePath.append(pathComponents[pci]);
+				if (pci == 0) {
+					// indicates root path which uniquely ends with file separator
+					filePath.append(File.separator);
+				}
+				File newFile = new File(filePath.toString());
+				CheckboxFileTreeNode newNode = (CheckboxFileTreeNode) factory.createNode(node, newFile);
 				model.insertNodeInto(newNode, node, index);
 				node = newNode;
 				pci++;

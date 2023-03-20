@@ -44,7 +44,13 @@ public class FileTreeCellRenderer implements TreeCellRenderer {
 			}			
 		} else {
 			if (node.isInvalid()) {
-				label.setIcon(fileIconCache.get(node.getFile(), FileIconOverlayType.ERROR));
+				if (leaf) {
+					label.setIcon(fileIconCache.get(node.getFile(), FileIconOverlayType.ERROR));
+				} else if (FileUtil.isDirectoryRootPath(node.getFile())) {
+					label.setIcon(fileIconCache.getDriveIcon(FileIconOverlayType.ERROR));
+				} else {
+					label.setIcon(fileIconCache.getFolderIcon(FileIconOverlayType.ERROR));
+				}
 			} else if (node.getInvalidDescendantsCount() > 0) {
 				label.setIcon(fileIconCache.get(node.getFile(), FileIconOverlayType.WARNING));
 			} else {

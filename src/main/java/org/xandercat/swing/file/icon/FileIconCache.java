@@ -65,6 +65,14 @@ public class FileIconCache extends SoftReferenceCache<Resource, ImageIcon> {
 		return get(fileIconSet.getFolderOpenResource(), overlayType);
 	}
 	
+	public ImageIcon getFolderIcon(FileIconOverlayType overlayType) {
+		return get(fileIconSet.getFolderResource(), overlayType);
+	}
+	
+	public ImageIcon getDriveIcon(FileIconOverlayType overlayType) {
+		return get(fileIconSet.getDriveResource(), overlayType);
+	}
+	
 	public ImageIcon get(File file, FileIconOverlayType overlayType) {
 		return get(fileIconSet.getResource(file), overlayType);
 	}
