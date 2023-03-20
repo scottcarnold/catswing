@@ -375,6 +375,7 @@ public class FileCopyProcessFrame extends JFrame implements FileCopyListener, Wi
 	
 	public void copyComplete(boolean resolutionRequired, boolean copyCancelled) {
 		this.copyComplete = true;
+		updateCounts();
 		if (resolutionRequired) {
 			messageScrollPane.addMessage("Process complete.  Some files need resolution.");
 			headingLabel.setText("Process complete.  Some files need resolution.");
