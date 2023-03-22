@@ -4,12 +4,11 @@ import java.awt.Window;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -17,6 +16,9 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+
+import org.xandercat.swing.file.FileFilterFactory;
+import org.xandercat.swing.file.FilterType;
 
 import com.apple.eawt.AboutHandler;
 import com.apple.eawt.AppEvent.AboutEvent;
@@ -35,80 +37,69 @@ import com.apple.eawt.QuitResponse;
  */
 public class PlatformTool {
 
-	private static final Set<String> SYSTEM_FILENAMES = new HashSet<String>();
-	private static boolean ignoreSystemFiles = false;
-	
-	static {
-		SYSTEM_FILENAMES.add(".DS_Store");
-	}
-	
 	public static enum MenuItemType {
 		ABOUT, EXIT, PREFERENCES;
 	};
 	
-	public static final FileFilter FILE_FILTER = new FileFilter() {
+	private static class CompoundFileFilter implements FileFilter {
+
+		private Map<String, FileFilter> filters = new HashMap<String, FileFilter>();
+
+		void addFilter(String key, FileFilter filter) {
+			filters.put(key, filter);
+		}
+		
+		void removeFilter(String key) {
+			filters.remove(key);
+		}
+		
 		@Override
 		public boolean accept(File pathname) {
-			if (ignoreSystemFiles) {
-				return !PlatformTool.isSystemFile(pathname);
-			}
-			return true;
-		}	
-	};
-	
-	public static FilenameFilter FILENAME_FILTER = new FilenameFilter() {
-		@Override
-		public boolean accept(File dir, String name) {
-			if (ignoreSystemFiles) {
-				return !PlatformTool.isSystemFilename(name);
+			for (FileFilter filter : filters.values()) {
+				if (!filter.accept(pathname)) {
+					return false;
+				}
 			}
 			return true;
 		}
-	};
+	}
+	
+	public static final CompoundFileFilter FILE_FILTER = new CompoundFileFilter();
 	
 	private static final String osName = System.getProperty("os.name");
 	
 	/**
 	 * When set to true, file handling classes throughout the CatSwing library will
 	 * ignore "system files" such as the Mac ".DS_Store" file.  This can be 
-	 * extended beyond CatSwing by using PlatformTool.FILE_FILTER and PlatformTool.FILENAME_FILTER.
+	 * extended beyond CatSwing by using PlatformTool.FILE_FILTER.
 	 * 
 	 * @param ignoreSystemFiles whether or not to ignore system files
 	 */
 	public static void setIgnoreSystemFiles(boolean ignoreSystemFiles) {
-		PlatformTool.ignoreSystemFiles = ignoreSystemFiles;
+		final FilterType[] systemFilterTypes = new FilterType[] { FilterType.MAC_DS_STORE, FilterType.WIN_DOLLAR, FilterType.WIN_NTUSER_DAT, FilterType.WIN_PAGEFILE};
+		for (FilterType filterType : systemFilterTypes) {
+			if (ignoreSystemFiles) {
+				FILE_FILTER.addFilter(filterType.name(), FileFilterFactory.filter(filterType));
+			} else {
+				FILE_FILTER.removeFilter(filterType.name());
+			}
+		}
 	}
 	
-	/**
-	 * Return whether or not a file of given filename is considered to be a generic system file.
-	 * 
-	 * @param filename    filename to check
-	 * 
-	 * @return whether or not filename is considered to be a generic system file filename.
-	 */
-	public static boolean isSystemFilename(String filename) {
-		if (filename == null) {
-			return false;
+	public static void setIgnoreHiddenFiles(boolean ignoreHiddenFiles) {
+		if (ignoreHiddenFiles) {
+			FILE_FILTER.addFilter(FilterType.HIDDEN.name(), FileFilterFactory.filter(FilterType.HIDDEN));
+		} else {
+			FILE_FILTER.removeFilter(FilterType.HIDDEN.name());
 		}
-		int i = filename.lastIndexOf(File.separator);
-		if (i >= 0) {
-			filename = filename.substring(i+File.separator.length());
-		}
-		return SYSTEM_FILENAMES.contains(filename);
 	}
 	
-	/**
-	 * Return whether or not the given file is considered to be a generic system file.
-	 * 
-	 * @param file    file to check
-	 * 
-	 * @return whether or not file is considered to be a generic system file.
-	 */
-	public static boolean isSystemFile(File file) {
-		if (file == null) {
-			return false;
-		}
-		return SYSTEM_FILENAMES.contains(file.getName());
+	public static void addCustomFileFilter(String key, FileFilter fileFilter) {
+		FILE_FILTER.addFilter(key, fileFilter);
+	}
+	
+	public static void removeCustomFileFilter(String key) {
+		FILE_FILTER.removeFilter(key);
 	}
 	
 	/**
