@@ -227,6 +227,18 @@ public class RecentlyLoadedFilesManager {
 		}
 	}
 
+	/**
+	 * Call this method to remove an obsolete file from the list.
+	 * 
+	 * @param file file to remove from recently loaded files list
+	 */
+	public void remove(File file) {
+		int index = recentlyLoadedFiles.indexOf(file);
+		if (index >= 0) {
+			removeAtIndex(index);
+		}
+	}
+	
 	private void addAtIndex(int index, File file) {
 		JMenuItem menuItem = getRecentlyLoadedMenuItem(file);
 		File bumpFile = file;
