@@ -140,12 +140,12 @@ public class LookAndFeelSelectionPanel extends JPanel implements ListSelectionLi
 		try {
 			LAFDetail lafDetail = this.lafDetailMap.get(lafName);
 			if (lafDetail == null) {
-				log.info("Unable to lookup Look & Feel detail for Look & Feel with name \"" + lafName + "\"");
+				log.debug("Unable to lookup Look & Feel detail for Look & Feel with name \"" + lafName + "\"");
 				StringBuilder sb = new StringBuilder("Available Look & Feel Names: ");
 				for (String availLAF : this.lafDetailMap.keySet()) {
 					sb.append(" [" + availLAF + "] ");
 				}
-				log.info(sb.toString());
+				log.debug(sb.toString());
 			} else {
 				lafDetail.description = description;
 				lafDetail.image = ImageIO.read(getClass().getResource(imageName));

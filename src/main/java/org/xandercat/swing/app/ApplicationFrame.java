@@ -75,7 +75,7 @@ public class ApplicationFrame extends JFrame implements WindowListener {
 		this.appName = appName;
 		this.appVersion = appVersion;
 		this.splashScreen = SplashScreen.getSplashScreen();
-		log.info("Splash screen " + ((this.splashScreen == null)? "disabled." : "enabled."));
+		log.debug("Splash screen " + ((this.splashScreen == null)? "disabled." : "enabled."));
 		if (this.splashScreen != null) {
 			this.splashGraphics2D = this.splashScreen.createGraphics();
 		}
@@ -107,6 +107,7 @@ public class ApplicationFrame extends JFrame implements WindowListener {
 			this.splashScreen = null;
 		}
 		super.setVisible(visible);
+		log.info("Application window opened.");
 	}
 	
 	/**
@@ -189,14 +190,14 @@ public class ApplicationFrame extends JFrame implements WindowListener {
 	}
 
 	public void windowClosing(WindowEvent event) {
-		log.info("Preparing for application close...");
+		log.debug("Preparing for application close...");
 		for (CloseListener closeListener : this.closeListeners) {
 			if (!closeListener.closeAction(event)) {
-				log.info("Application close cancelled.");
+				log.info("Application window close cancelled.");
 				return;
 			}
 		}
-		log.info("Application closed.");
+		log.info("Application window closed.");
 		System.exit(0);		
 	}
 
